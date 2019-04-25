@@ -2,7 +2,7 @@
 * @author           : Shiva
 * @version          : 1.0
 * @date             : 20-Apr 2019
-* @description      : 
+* @description      : RegistrationHandler class to facilitate login process
 * @param            : N/A
  @Controller        : Used in Facebook Auth providers to create users when new user logged in using facebook credentials
 */
