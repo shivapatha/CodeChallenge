@@ -1,0 +1,63 @@
+/*
+* @author           : Shiva
+* @version          : 1.0
+* @date             : 20-Apr 2019
+* @description      : 
+* @param            : N/A
+ @Controller        : Used in Facebook Auth providers to create users when new user logged in using facebook credentials
+*/
+global class FacebookRegistrationHandler implements Auth.RegistrationHandler{
+		private static final String ORG_SUFFIX = '.sso.badge.org';
+		private static final String INTERNAL_USER_PROFILE = 'Standard User';    
+
+		/*********************************************************************************
+		Method Name    : CreateUser
+		Description    : Method to create user and load data to data base
+		Return Type    : User instance
+		Parameter      : Portal Id and also user details
+		*********************************************************************************/
+		global User createUser(Id portalId, Auth.UserData data){
+		        // Checking if we have all details to create users
+				if(data != null && data.email != null && data.lastName != null  && data.firstName != null) {
+						return null;
+				}
+				// Creating standard user
+				Profile p = [SELECT Id FROM profile WHERE name=:INTERNAL_USER_PROFILE];
+				User u = new User();
+				u.username = data.email + ORG_SUFFIX;
+				u.email = data.email;
+				u.lastName = data.lastName;
+				u.firstName = data.firstName;
+				String alias = data.firstName + data.lastName;
+
+				//Alias must be 8 characters or less
+				if(alias.length() > 8) {
+						alias = alias.substring(0, 8);
+				}
+				u.alias = alias;
+				u.languagelocalekey = UserInfo.getLocale();
+				u.localesidkey = UserInfo.getLocale();
+				u.emailEncodingKey = 'UTF-8';
+				u.timeZoneSidKey = 'America/Los_Angeles';
+				u.profileId = p.Id;
+				
+				// Calling webservice class to load data into databased hosted on heroku
+				WebServiceCallout.CreateData(firstname, lastname, email );  
+				return u;	
+		}
+
+		/*********************************************************************************
+		Method Name    : updateUser
+		Description    : Method to update user and load data to data base
+		Return Type    : User instance
+		Parameter      : Portal Id and also user details
+		*********************************************************************************/
+		global void updateUser(Id userId, Id portalId, Auth.UserData data){
+				User u = new User(id=userId);
+				u.email = data.email;
+				u.lastName = data.lastName;
+				u.firstName = data.firstName;
+				update(u);
+		}
+}
+
